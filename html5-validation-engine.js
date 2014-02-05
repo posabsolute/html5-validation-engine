@@ -32,7 +32,7 @@
         },
         isHtml5 : function(){
             // need to optimise
-            if (!typeof document.createElement("input").checkValidity === "function") {
+            if (typeof document.createElement("input").checkValidity === "function") {
                 return true;
             }else{
                 return false;
@@ -71,7 +71,7 @@
                         e.stopImmediatePropagation();
                         return false;
                     }
-                    return valid; self.checkIfValid($(this));
+                    return valid;
                 });
             }
         },
