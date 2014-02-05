@@ -13,7 +13,7 @@
     </head>
     <body>
 
-		<form id="testform" action="/" novalidate>
+		<form id="testform" action="/">
 			<div>
 				<label>Email</label>
 				<input id="email" type="email" required validate>
@@ -31,6 +31,10 @@
 		</form>
 		<script>
 			$(document).html5ValidationEngine();
+
+			$("#testform").on("submit", function(){
+				console.log("shit")
+			})
 		</script>
     </body>
 </html>

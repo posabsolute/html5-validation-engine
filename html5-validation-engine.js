@@ -32,7 +32,7 @@
         },
         isHtml5 : function(){
             // need to optimise
-            if (typeof document.createElement("input").checkValidity === "function") {
+            if (!typeof document.createElement("input").checkValidity === "function") {
                 return true;
             }else{
                 return false;
@@ -41,17 +41,20 @@
         loadHtml5Validation : function () {
             var self = this;
             $("form").attr("novalidate", true);
-            $(document).on("submit", "form" , function(){
-                if(!this.checkValidity()){
-                    self.checkIfValid($(this));
+            $(document).on("click", ":submit" , function(e){
+                var $form = $(this).closest("form");
+                if(!$form[0].checkValidity()){
+                    self.checkIfValid($form);
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     return false;
                 }
                 return true;
             });
+
         },
         loadFallback : function () {
             var self = this;
-
             if( this.$el[0].tagName === "form" ){
                 this.$el.on("submit", function(){
                     return self.checkIfValid($(this));
@@ -59,8 +62,16 @@
             }else if(this.$el.is(":input")){
                 console.log("do something on input");
             }else{
-                this.$el.on("submit", "form" , function(){
-                    return self.checkIfValid($(this));
+                this.$el.on("click", ":submit" , function(e){
+                    var valid = true,
+                        $form = $(this).closest("form");
+
+                    if(!self.checkIfValid($form)){
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                    return valid; self.checkIfValid($(this));
                 });
             }
         },
