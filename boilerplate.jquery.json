@@ -1,0 +1,28 @@
+{
+	"name": "html5-validation-engine",
+	"title": "HTML5 Validation Engine",
+	"description": "A plugin that augment HTML5 validation & polyfill for older browsers.",
+	"keywords": [
+		"jquery",
+		"validation",
+		"form"
+	],
+	"version": "0.0.1",
+	"author": {
+		"name": "Cedric Dugas",
+		"url": "http://www.position-absolute.com"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://zenorocha.mit-license.org/"
+		}
+	],
+	"bugs": "https://github.com/jquery-boilerplate/boilerplate/issues",
+	"homepage": "http://jqueryboilerplate.com",
+	"docs": "https://github.com/jquery-boilerplate/boilerplate#readme",
+	"download": "https://github.com/jquery-boilerplate/boilerplate/archive/master.zip",
+	"dependencies": {
+		"jquery": ">=1.4"
+	}
+}
