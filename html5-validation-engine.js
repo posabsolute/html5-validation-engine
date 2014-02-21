@@ -1,6 +1,6 @@
 /*!
  * jQuery HTML5 Validation Engine
- * Original author: @posabsolute, Cedric Dugas
+ * Original author: @posabsolute, Cedric Dugas, http://www.position-absolute.com
  * Licensed under the MIT license
  */
 
@@ -78,7 +78,7 @@
         checkIfValid : function($form){
             var isValid = true, self = this;
             $form.find(".error").remove();
-            $form.find("input[required]").each(function(){
+            $form.find(":input[required]").each(function(){
                 if(self.getErrortype($(this))){
                     isValid = false;
                 }
@@ -87,23 +87,52 @@
         },
         getErrortype: function($input){
             if(this.isHtml5()){
-                this.showError($input, $input[0].validationMessage);
+                return this.getError($input);
             }else{
                 return this.getErrortypeFallback($input);
             }
         },
-        getErrortypeFallback : function($input){
-            if(!$input.val()){
-                this.showError($input, "This field is empty");
-                return true;
+        getError : function($input){
+            var isNotValid = false;
+            if($input[0].validationMessage){
+                var message = $input.data("error-message") || $input[0].validationMessage;
+                this.showError($input, message);
+                isNotValid = true;
+            }else{
+                isNotValid = false;
             }
-            return false;
+            return isNotValid;
+        },
+        getErrortypeFallback : function($input){
+            var isNotValid = false;
+            if($input.attr("type") === "radio"){
+                isNotValid = this.validate.radio($input);
+            } else if(!$input.val()){
+
+                isNotValid = true;
+            }
+            if(isNotValid){
+                var message = $input.data("error-message") || "This field is required";
+                this.showError($input, message);
+            }
+            return isNotValid;
         },
         showError : function($input, message){
-            $input.before("<div class='error'>"+message+"</div>");
+            $input.after("<div class='error'><i class='fa fa-exclamation-triangle'></i>"+message+"</div>");
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
+        },
+        validate :{
+            radio: function($input){
+                var isNotValid = false,
+                    $group = $("[name='"+$input.attr("name")+"']:checked");
+
+                if(!$group.val()){
+                    isNotValid =  true;
+                }
+                return isNotValid;
+            }
         }
     };
 

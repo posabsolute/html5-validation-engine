@@ -18,11 +18,11 @@
 			"url": "http://zenorocha.mit-license.org/"
 		}
 	],
-	"bugs": "https://github.com/jquery-boilerplate/boilerplate/issues",
-	"homepage": "http://jqueryboilerplate.com",
-	"docs": "https://github.com/jquery-boilerplate/boilerplate#readme",
-	"download": "https://github.com/jquery-boilerplate/boilerplate/archive/master.zip",
+	"bugs": "https://github.com/posabsolute/html5-validation-engine/issues",
+	"homepage": "https://github.com/posabsolute/html5-validation-engine",
+	"docs": "https://github.com/posabsolute/html5-validation-engine#readme",
+	"download": "https://github.com/posabsolute/html5-validation-engine/archive/master.zip",
 	"dependencies": {
-		"jquery": ">=1.4"
+		"jquery": ">=1.9"
 	}
 }

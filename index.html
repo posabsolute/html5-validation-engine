@@ -26,6 +26,21 @@
 				<label>url</label>
 				<input type="url" required validate>
 			</div>
+			<div>
+				<label>Select</label>
+				<select  data-error-message="Please select a country" required>
+					<option value="">Choose an option</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+				</select>
+			</div>
+
+			<div>
+				<label>radio</label>
+				<input type="radio" value="1" name="radiocheck" />
+				<input type="radio" value="2" name="radiocheck" required  data-error-message="Please select one option"/>
+			</div>
 			<br />
 			<input type="submit" value="submit">
 		</form>
