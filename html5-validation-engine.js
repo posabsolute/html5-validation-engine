@@ -8,7 +8,9 @@
 
 
     var pluginName = "html5ValidationEngine",
-        defaults = {};
+        defaults = {
+            currentLocal : "en_US"
+        };
 
     function Plugin( element, options ) {
         this.$el = $(element);
@@ -41,7 +43,7 @@
         loadHtml5Validation : function () {
             var self = this;
             $("form").attr("novalidate", true);
-            $(document).on("click", ":submit" , function(e){
+            this.$el.on("click", ":submit" , function(e){
                 var $form = $(this).closest("form");
                 if(!$form[0].checkValidity()){
                     self.checkIfValid($form);
@@ -55,6 +57,7 @@
         },
         loadFallback : function () {
             var self = this;
+            $("form").attr("novalidate", true);
             if( this.$el[0].tagName === "form" ){
                 this.$el.on("submit", function(){
                     return self.checkIfValid($(this));
@@ -95,8 +98,7 @@
         getError : function($input){
             var isNotValid = false;
             if($input[0].validationMessage){
-                var message = $input.data("error-message") || $input[0].validationMessage;
-                this.showError($input, message);
+                this.showError($input);
                 isNotValid = true;
             }else{
                 isNotValid = false;
@@ -104,20 +106,34 @@
             return isNotValid;
         },
         getErrortypeFallback : function($input){
-            var isNotValid = false;
-            if($input.attr("type") === "radio"){
-                isNotValid = this.validate.radio($input);
-            } else if(!$input.val()){
-
-                isNotValid = true;
+            var inputType = $input.attr("type");
+            var error = {
+                type: "",
+                isNotValid : false
+            };
+            if(inputType === "radio"){
+                error = this.validate.radio($input);
+            }else if(!$input.val()){
+                error = {
+                    type:"required",
+                    isNotValid : true
+                };
+                
+            }else if(inputType === "text" || inputType === "password" || inputType === "date"){
+                error = this.validate.text($input);
+                
             }
-            if(isNotValid){
-                var message = $input.data("error-message") || "This field is required";
-                this.showError($input, message);
+            if(error.isNotValid){
+                this.showError($input);
             }
-            return isNotValid;
+            return error.isNotValid;
         },
-        showError : function($input, message){
+        showError : function($input){
+            var message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal][$input.data("error-message")] ||
+                            $input.data("error-message") ||
+                            $input[0].validationMessage ||
+                            "This field is required";
+
             $input.after("<div class='error'><i class='fa fa-exclamation-triangle'></i>"+message+"</div>");
         },
         destroy : function(){
@@ -125,19 +141,34 @@
         },
         validate :{
             radio: function($input){
-                var isNotValid = false,
-                    $group = $("[name='"+$input.attr("name")+"']:checked");
-
-                if(!$group.val()){
-                    isNotValid =  true;
+                var $group = $("[name='"+$input.attr("name")+"']:checked");
+                return {
+                    type:"radio",
+                    isNotValid : !$group.val() ? true : false
+                };
+            },
+            text : function($input){
+                var pattern = $input.attr("pattern"),
+                    matchElement = $input.attr("match"),
+                    isNotValid = false,
+                    type ="";
+                if(pattern){
+                    type="pattern";
+                    var regex = new RegExp(pattern);
+                    isNotValid = !regex.test($input.val()) ? true : false;
+                }else if(matchElement){
+                    type="match";
+                    isNotValid = $(matchElement).val() !== $input.val() ? true : false;
                 }
-                return isNotValid;
+                return {
+                    type:type,
+                    isNotValid : isNotValid
+                };
             }
         }
     };
 
-    // A really lightweight plugin wrapper around the constructor,
-    // preventing against multiple instantiations
+
     $.fn[pluginName] = function ( options ) {
         return this.each(function () {
             if (!$.data(this, "plugin_" + pluginName)) {
@@ -146,5 +177,29 @@
             }
         });
     };
-
+    // Formating localisations
+    $.html5ValidationEngine = {
+        localisations : {},
+        format : function( source, params ) {
+            if ( arguments.length === 1 ) {
+                return function() {
+                    var args = $.makeArray(arguments);
+                    args.unshift(source);
+                    return $.validator.format.apply( this, args );
+                };
+            }
+            if ( arguments.length > 2 && params.constructor !== Array  ) {
+                params = $.makeArray(arguments).slice(1);
+            }
+            if ( params.constructor !== Array ) {
+                params = [ params ];
+            }
+            $.each(params, function( i, n ) {
+                source = source.replace( new RegExp("\\{" + i + "\\}", "g"), function() {
+                    return n;
+                });
+            });
+            return source;
+        }
+    };
 })( jQuery, window, document );

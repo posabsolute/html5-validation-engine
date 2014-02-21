@@ -10,6 +10,12 @@
         <meta name="description" content="">
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="html5-validation-engine.js"></script>
+        <script src="localisations/en_US.js"></script>
+        <style>
+			form > div {
+				margin-bottom:20px;
+			}
+        </style>
     </head>
     <body>
 
@@ -25,6 +31,18 @@
 			<div>
 				<label>url</label>
 				<input type="url" required validate>
+			</div>
+			<div>
+				<label>Pattern mismatch</label>
+				<input type="text" pattern="[0-9]{4}" required validate>
+			</div>
+			<div>
+				<label>Password</label>
+				<input type="text" id="password" required validate>
+			</div>
+			<div>
+				<label>Password Match</label>
+				<input type="text" match="#password" data-error-message="Password must match" required validate>
 			</div>
 			<div>
 				<label>Select</label>
