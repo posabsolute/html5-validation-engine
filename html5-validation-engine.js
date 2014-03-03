@@ -26,11 +26,8 @@
     Plugin.prototype = {
 
         init: function() {
-            if(this.isHtml5()) {
-                this.loadHtml5Validation();
-            }else{
-                this.loadFallback();
-            }
+           
+            this.loadValidation();
         },
         isHtml5 : function(){
             // need to optimise
@@ -40,32 +37,16 @@
                 return false;
             }
         },
-        loadHtml5Validation : function () {
+        loadValidation : function () {
             var self = this;
-            $("form").attr("novalidate", true);
-            this.$el.on("click", ":submit" , function(e){
-                var $form = $(this).closest("form");
-                if(!$form[0].checkValidity()){
-                    self.checkIfValid($form);
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    return false;
-                }
-                return true;
-            });
-
-        },
-        loadFallback : function () {
-            var self = this;
-            $("form").attr("novalidate", true);
             if( this.$el[0].tagName === "form" ){
                 this.$el.on("submit", function(){
+                    $("form").attr("novalidate", true);
                     return self.checkIfValid($(this));
                 });
-            }else if(this.$el.is(":input")){
-                console.log("do something on input");
             }else{
                 this.$el.on("click", ":submit" , function(e){
+                    $("form").attr("novalidate", true);
                     var valid = true,
                         $form = $(this).closest("form");
 
@@ -77,28 +58,35 @@
                     return valid;
                 });
             }
+            this.$el.on("blur", ":input" , function(){
+                self.getErrortype($(this));
+            });
         },
         checkIfValid : function($form){
             var isValid = true, self = this;
             $form.find(".error").remove();
-            $form.find(":input[required]").each(function(){
+            $form.find(":input[validate],:input[required]").each(function(){
                 if(self.getErrortype($(this))){
                     isValid = false;
                 }
             });
+
             return isValid;
         },
         getErrortype: function($input){
-            if(this.isHtml5()){
-                return this.getError($input);
-            }else{
-                return this.getErrortypeFallback($input);
+            var error = false;
+
+            if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+                error = true;
             }
+            if(error){
+                this.showError($input);
+            }
+            return error;
         },
         getError : function($input){
             var isNotValid = false;
             if($input[0].validationMessage){
-                this.showError($input);
                 isNotValid = true;
             }else{
                 isNotValid = false;
@@ -121,10 +109,17 @@
                 
             }else if(inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
-                
             }
-            if(error.isNotValid){
-                this.showError($input);
+            return error.isNotValid;
+        },
+        getErrorCustom : function($input){
+            var inputType = $input.attr("type");
+            var error = {
+                type: "",
+                isNotValid : false
+            };
+            if(inputType === "text" || inputType === "password" || inputType === "date"){
+                error = this.validationCustom.text($input);
             }
             return error.isNotValid;
         },
@@ -133,7 +128,7 @@
                             $input.data("error-message") ||
                             $input[0].validationMessage ||
                             "This field is required";
-
+            $input.parent().find(".error").remove();
             $input.after("<div class='error'><i class='fa fa-exclamation-triangle'></i>"+message+"</div>");
         },
         destroy : function(){
@@ -150,13 +145,38 @@
             text : function($input){
                 var pattern = $input.attr("pattern"),
                     matchElement = $input.attr("match"),
+                    maxlength = $input.attr("maxlength"),
+                    min = $input.attr("min"),
+                    max = $input.attr("max"),
                     isNotValid = false,
                     type ="";
+
                 if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
                     isNotValid = !regex.test($input.val()) ? true : false;
                 }else if(matchElement){
+                    type="match";
+                    isNotValid = $(matchElement).val() !== $input.val() ? true : false;
+                }else if(maxlength){
+                    type="maxlength";
+                    isNotValid = $input.val().length > parseFloat(maxlength) ? true : false;
+                }else if(min && max){
+                    type="minmax";
+                    isNotValid = ($input.val().length < min || $input.val().length> max) ? true : false;
+                }
+                return {
+                    type:type,
+                    isNotValid : isNotValid
+                };
+            }
+        },
+        validationCustom :{
+            text : function($input){
+                var matchElement = $input.attr("match"),
+                    isNotValid = false,
+                    type ="";
+                if(matchElement){
                     type="match";
                     isNotValid = $(matchElement).val() !== $input.val() ? true : false;
                 }
