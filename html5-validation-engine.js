@@ -138,7 +138,7 @@
                             $input[0].validationMessage ||
                             "This field is required";
             $input.next(".error:first").remove();
-            $input.after("<div class='error'><i class='fa fa-exclamation-triangle'></i>"+message+"</div>");
+            $input.after("<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>");
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
