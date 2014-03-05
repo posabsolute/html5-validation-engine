@@ -58,9 +58,18 @@
                     return valid;
                 });
             }
-            this.$el.on("blur", ":input" , function(){
-                self.getErrortype($(this));
+            this.$el.on("blur", ":input", function(){
+                var $el = $(this);
+                if(!self.checkInput($el)){
+                    $el.next(".error:first").remove();
+                }
             });
+        },
+        submitEvent : function(){
+
+        },
+        blurEvent: function(){
+
         },
         checkIfValid : function($form){
             var isValid = true, self = this;
@@ -72,6 +81,11 @@
             });
 
             return isValid;
+        },
+        checkInput : function ($el) {
+            if($el.attr('validate') || $el.attr('required')){
+                return this.getErrortype($el);
+            }
         },
         getErrortype: function($input){
             var error = false;
@@ -85,12 +99,7 @@
             return error;
         },
         getError : function($input){
-            var isNotValid = false;
-            if($input[0].validationMessage){
-                isNotValid = true;
-            }else{
-                isNotValid = false;
-            }
+            var isNotValid = $input[0].validationMessage ? true : false;
             return isNotValid;
         },
         getErrortypeFallback : function($input){
@@ -128,11 +137,13 @@
                             $input.data("error-message") ||
                             $input[0].validationMessage ||
                             "This field is required";
-            $input.parent().find(".error").remove();
+            $input.next(".error:first").remove();
             $input.after("<div class='error'><i class='fa fa-exclamation-triangle'></i>"+message+"</div>");
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
+            $(document).off(":submit", this.submitEvent);
+            $(document).off(":blur",   this.blurEvent);
         },
         validate :{
             radio: function($input){
@@ -190,12 +201,18 @@
 
 
     $.fn[pluginName] = function ( options ) {
-        return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName,
-                new Plugin( this, options ));
-            }
-        });
+        console.log(options)
+        if (typeof(options) === 'string'  && Plugin.prototype[options]) {
+
+            Plugin.prototype[options](this);
+        } else {
+            return this.each(function () {
+                if (!$.data(this, "plugin_" + pluginName)) {
+                    $.data(this, "plugin_" + pluginName,
+                    new Plugin( this, options ));
+                }
+            });
+        }
     };
     // Formating localisations
     $.html5ValidationEngine = {
