@@ -62,6 +62,7 @@
                 var $el = $(this);
                 if(!self.checkInput($el)){
                     $el.next(".error:first").remove();
+                    $el.next(".hopOver").next(".error:first").remove();
                 }
             });
         },
@@ -138,8 +139,8 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>";
-            $input.nextAll(".error:first").remove();
-
+            $input.next(".error:first").remove();
+            $input.next(".hopOver").next(".error:first").remove();
             if(!$input.next().hasClass("hopOver")){
                 $input.after(content);
             }else{
