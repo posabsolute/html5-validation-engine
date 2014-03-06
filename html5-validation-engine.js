@@ -136,9 +136,15 @@
             var message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal][$input.data("error-message")] ||
                             $input.data("error-message") ||
                             $input[0].validationMessage ||
-                            "This field is required";
+                            "This field is required",
+                content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>";
             $input.next(".error:first").remove();
-            $input.after("<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>");
+            if(!$input.next().hasClass("hopOver")){
+                $input.after(content);
+            }else{
+                $input.next(".hopOver:first").after(content);
+            }
+            
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
@@ -201,7 +207,6 @@
 
 
     $.fn[pluginName] = function ( options ) {
-        console.log(options)
         if (typeof(options) === 'string'  && Plugin.prototype[options]) {
 
             Plugin.prototype[options](this);
