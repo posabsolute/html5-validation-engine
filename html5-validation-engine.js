@@ -138,7 +138,8 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>";
-            $input.next(".error:first").remove();
+            $input.nextAll(".error:first").remove();
+
             if(!$input.next().hasClass("hopOver")){
                 $input.after(content);
             }else{
