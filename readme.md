@@ -1,8 +1,10 @@
 ## HTML5 Validation Engine
 
-This is only a first draft for a plugin that augment HTML5 form validation with custom messages. Not ready for production use.
+**This is only a first draft for a plugin that augment HTML5 form validation with custom messages. Not ready for production use.
 
+This jQuery plugin provide a container for hanling form validation on top of regular HTML5 validation. It augment the current set of validation provided by HTML5, enable you to change error prompts design & fallback for older browsers.
 
+It works the same way as you would use the html5 validator.
 
 ## Installation
 
