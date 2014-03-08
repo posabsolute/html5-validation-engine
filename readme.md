@@ -4,7 +4,7 @@
 
 This jQuery plugin provide a container for hanling form validation on top of regular HTML5 validation. It augment the current set of validation provided by HTML5, enable you to change error prompts design & fallback for older browsers.
 
-It works the same way as you would use the html5 validator.
+It works the same way as you would use the html5 validator. add $(document).html5ValidationEngine() & never worry about it anymore.
 
 ## Installation
 
