@@ -61,6 +61,15 @@
             this.$el.on("blur", ":input", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
+                    $("#error_"+$el.attr("id")).empty();
+                    $el.next(".error:first").remove();
+                    $el.next(".hopOver").next(".error:first").remove();
+                }
+            });
+            this.$el.on("click", "[type=checkbox],[type=radio]", function(){
+                var $el = $(this);
+                if(!self.checkInput($el)){
+                    $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
                 }
@@ -131,6 +140,9 @@
             if(inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validationCustom.text($input);
             }
+            if(inputType === "checkbox"){
+                error = this.validationCustom.checkbox($input);
+            }
             return error.isNotValid;
         },
         showError : function($input){
@@ -138,10 +150,14 @@
                             $input.data("error-message") ||
                             $input[0].validationMessage ||
                             "This field is required",
-                content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>";
+                content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>",
+                $errorContainer = $("#error_"+$input.attr("id"));
+
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
-            if(!$input.next().hasClass("hopOver")){
+            if($errorContainer.length){
+                $errorContainer.html(content);
+            } else if(!$input.next().hasClass("hopOver")){
                 $input.after(content);
             }else{
                 $input.next(".hopOver:first").after(content);
@@ -191,6 +207,14 @@
             }
         },
         validationCustom :{
+            checkbox : function($input){
+                var numCheck = parseInt($input.attr("mincheckbox")) || 0,
+                    $group = $("[name='"+$input.attr("name")+"']:checked");
+                return {
+                    type:"checkbox",
+                    isNotValid : ($group.length < numCheck ) ? true : false
+                };
+            },
             text : function($input){
                 var matchElement = $input.attr("match"),
                     isNotValid = false,
