@@ -109,7 +109,7 @@
             return error;
         },
         getError : function($input){
-            var isNotValid = $input[0].validationMessage ? true : false;
+            var isNotValid = ($input[0].validationMessage || !$.trim($input.val())) ? true : false;
             return isNotValid;
         },
         getErrortypeFallback : function($input){
