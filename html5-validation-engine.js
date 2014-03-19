@@ -93,8 +93,18 @@
             return isValid;
         },
         checkInput : function ($el) {
-            if($el.attr('validate') || $el.attr('required')){
+
+            if($el.attr('required')){
+
                 return this.getErrortype($el);
+            }
+            if($el.attr('validate')){
+                if($.trim($el.val())){
+                    return this.getErrortype($el);
+                }else{
+                    return false;
+                }
+                
             }
         },
         getErrortype: function($input){
