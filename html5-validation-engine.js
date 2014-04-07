@@ -160,9 +160,17 @@
                             $input.data("error-message") ||
                             $input[0].validationMessage ||
                             "This field is required",
-                content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>",
                 $errorContainer = $("#error_"+$input.attr("id"));
 
+            // Re-adjust message if field is empty
+            var isRequired = $input.attr('required') && $input.attr('required') != '';
+            if ($input.val().length == 0 && isRequired) {
+                message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
+                            "This field is required";
+            }
+
+            var content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>"; 
+           
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
             if($errorContainer.length){
