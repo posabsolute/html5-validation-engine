@@ -58,7 +58,7 @@
                     return valid;
                 });
             }
-            this.$el.on("blur", ":input", function(){
+            this.$el.on("blur", ":input:not(.placeholder)", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
@@ -84,7 +84,7 @@
         checkIfValid : function($form){
             var isValid = true, self = this;
             $form.find(".error").remove();
-            $form.find(":input[validate],:input[required]").each(function(){
+            $form.find(":input[validate]:not(.placeholder),:input[required]:not(.placeholder)").each(function(){
                 if(self.getErrortype($(this))){
                     isValid = false;
                 }
