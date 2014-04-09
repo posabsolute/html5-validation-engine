@@ -40,7 +40,8 @@
         loadValidation : function () {
             var self = this;
             if( this.$el[0].tagName === "form" ){
-                this.$el.on("submit", function(){
+                this.$el.on("submit", function(e){
+
                     $("form").attr("novalidate", true);
                     return self.checkIfValid($(this));
                 });
@@ -49,12 +50,13 @@
                     $("form").attr("novalidate", true);
                     var valid = true,
                         $form = $(this).closest("form");
-
-                    if(!self.checkIfValid($form)){
+                    
+                    if($form.find('.error').length > 0 || !self.checkIfValid($form)){
                         e.stopPropagation();
                         e.stopImmediatePropagation();
                         return false;
                     }
+
                     return valid;
                 });
             }
@@ -83,7 +85,7 @@
             });
         },
         submitEvent : function(){
-
+            
         },
         blurEvent: function(){
 
@@ -146,6 +148,7 @@
             }else if(inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
             }
+           
             return error.isNotValid;
         },
         getErrorCustom : function($input){
@@ -177,10 +180,10 @@
             }
 
             var content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>"; 
-           
+
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
-            if($errorContainer.length){
+            if ($errorContainer.length) {
                 $errorContainer.html(content);
             } else if(!$input.next().hasClass("hopOver")){
                 $input.after(content);
@@ -203,7 +206,8 @@
                 };
             },
             text : function($input){
-                var pattern = $input.attr("pattern"),
+                var required = $input.attr("required"),
+                    pattern = $input.attr("pattern"),
                     matchElement = $input.attr("match"),
                     maxlength = $input.attr("maxlength"),
                     min = $input.attr("min"),
@@ -211,7 +215,10 @@
                     isNotValid = false,
                     type ="";
 
-                if(pattern){
+                if (required) {
+                    type="required";
+                    isNotValid = $input.val().length == 0 ? true : false;
+                }else if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
                     isNotValid = !regex.test($input.val()) ? true : false;
