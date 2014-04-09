@@ -74,6 +74,13 @@
                     $el.next(".hopOver").next(".error:first").remove();
                 }
             });
+            // clear error on input keydown (for ie8)
+            this.$el.on("input keydown", ":input:not(.placeholder)", function() {
+                var $el = $(this);
+                $("#error_"+$el.attr("id")).empty();
+                $el.next(".error:first").remove();
+                $el.next(".hopOver").next(".error:first").remove();
+            });
         },
         submitEvent : function(){
 
