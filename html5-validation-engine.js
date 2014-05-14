@@ -76,6 +76,16 @@
                     $el.next(".hopOver").next(".error:first").remove();
                 }
             });
+
+            this.$el.on("change", "select", function(){
+                var $el = $(this);
+                if(!self.checkInput($el)){
+                    $("#error_"+$el.attr("id")).empty();
+                    $el.next(".error:first").remove();
+                    $el.next(".hopOver").next(".error:first").remove();
+                }
+            });
+
             // clear error on input keydown (for ie8)
             this.$el.on("input keydown", ":input:not(.placeholder)", function() {
                 var $el = $(this);
@@ -93,7 +103,7 @@
         checkIfValid : function($form){
             var isValid = true, self = this;
             $form.find(".error").remove();
-            $form.find(":input[validate]:not(.placeholder),:input[required]:not(.placeholder)").each(function(){
+            $form.find(":input[validate]:not(.placeholder),:input[required]:not(.placeholder), select[required]").each(function(){
                 if(self.getErrortype($(this))){
                     isValid = false;
                 }
@@ -119,9 +129,12 @@
         getErrortype: function($input){
             var error = false;
 
-            if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+            if ($input[0].tagName === 'SELECT' && this.getErrortypeFallback($input)) {
+                error = true;
+            } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
                 error = true;
             }
+                
             if(error){
                 this.showError($input);
             }
@@ -139,7 +152,10 @@
             };
             if(inputType === "radio"){
                 error = this.validate.radio($input);
-            }else if(!$input.val()){
+            } else if ($input[0].tagName === 'SELECT') {
+                error = this.validate.select($input);
+            }
+            else if(!$input.val()){
                 error = {
                     type:"required",
                     isNotValid : true
@@ -171,10 +187,10 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 $errorContainer = $("#error_"+$input.attr("id"));
-
+                console.log($errorContainer)
             // Re-adjust message if field is empty
             var isRequired = $input.attr('required') && $input.attr('required') != '';
-            if ($input.val().length == 0 && isRequired) {
+            if (($input.val() && $input.val().length == 0) && isRequired) {
                 message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
                             "This field is required";
             }
@@ -203,6 +219,12 @@
                 return {
                     type:"radio",
                     isNotValid : !$group.val() ? true : false
+                };
+            },
+            select: function($select) {
+                return {
+                    type:"select",
+                    isNotValid : !$select.val() ? true : false
                 };
             },
             text : function($input){
