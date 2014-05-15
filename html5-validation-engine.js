@@ -187,7 +187,6 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 $errorContainer = $("#error_"+$input.attr("id"));
-                console.log($errorContainer)
             // Re-adjust message if field is empty
             var isRequired = $input.attr('required') && $input.attr('required') != '';
             if (($input.val() && $input.val().length == 0) && isRequired) {
