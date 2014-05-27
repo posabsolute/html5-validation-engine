@@ -60,14 +60,18 @@
                     return valid;
                 });
             }
+        
             this.$el.on("blur", ":input:not(.placeholder)", function(){
                 var $el = $(this);
+                if ($el.attr("data-no-error-onblur")) { return; }
+                
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
                 }
             });
+            
             this.$el.on("click", "[type=checkbox],[type=radio]", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
