@@ -145,11 +145,12 @@
             return error;
         },
         getError : function($input){
-            var isNotValid = ($input[0].validationMessage || !$.trim($input.val())) ? true : false;
+            var isNotValid = ($input[0].validationMessage) ? true : false;
             return isNotValid;
         },
         getErrortypeFallback : function($input){
             var inputType = $input.attr("type");
+            var isRequired = $input.attr("required");
             var error = {
                 type: "",
                 isNotValid : false
@@ -159,7 +160,7 @@
             } else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
             }
-            else if(!$input.val()){
+            else if(isRequired && !$input.val()){
                 error = {
                     type:"required",
                     isNotValid : true
@@ -246,7 +247,8 @@
                 }else if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
-                    isNotValid = !regex.test($input.val()) ? true : false;
+                    if ($input.val().length > 0)
+                        isNotValid = !regex.test($input.val()) ? true : false;
                 }else if(matchElement){
                     type="match";
                     isNotValid = $(matchElement).val() !== $input.val() ? true : false;
