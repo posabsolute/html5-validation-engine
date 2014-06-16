@@ -41,9 +41,12 @@
             var self = this;
             if( this.$el[0].tagName === "form" ){
                 this.$el.on("submit", function(e){
+                    var $form = $("form");
+                    $form.attr("novalidate", true);
 
-                    $("form").attr("novalidate", true);
-                    return self.checkIfValid($(this));
+                    var valid = self.checkIfValid($(this));
+                    if (!valid) { $form.trigger('invalid'); }
+                    return valid;
                 });
             }else{
                 this.$el.on("click", ":submit" , function(e){
@@ -54,6 +57,7 @@
                     if($form.find('.error').length > 0 || !self.checkIfValid($form)){
                         e.stopPropagation();
                         e.stopImmediatePropagation();
+                        $form.trigger('invalid');
                         return false;
                     }
 
@@ -145,12 +149,11 @@
             return error;
         },
         getError : function($input){
-            var isNotValid = ($input[0].validationMessage) ? true : false;
+            var isNotValid = ($input[0].validationMessage || !$.trim($input.val())) ? true : false;
             return isNotValid;
         },
         getErrortypeFallback : function($input){
             var inputType = $input.attr("type");
-            var isRequired = $input.attr("required");
             var error = {
                 type: "",
                 isNotValid : false
@@ -160,7 +163,7 @@
             } else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
             }
-            else if(isRequired && !$input.val()){
+            else if(!$input.val()){
                 error = {
                     type:"required",
                     isNotValid : true
@@ -247,8 +250,7 @@
                 }else if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
-                    if ($input.val().length > 0)
-                        isNotValid = !regex.test($input.val()) ? true : false;
+                    isNotValid = !regex.test($input.val()) ? true : false;
                 }else if(matchElement){
                     type="match";
                     isNotValid = $(matchElement).val() !== $input.val() ? true : false;
