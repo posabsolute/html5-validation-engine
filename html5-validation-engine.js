@@ -137,22 +137,30 @@
         getErrortype: function($input){
             var error = false;
 
-            if ($input[0].tagName === 'SELECT' && this.getErrortypeFallback($input)) {
-                error = true;
+            if ($input[0].tagName === 'SELECT') {
+                error = this.getErrortypeFallback($input);
             } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
                 error = true;
             }
-                
+  
             if(error){
                 this.showError($input);
             }
             return error;
         },
         getError : function($input){
-            var isNotValid = !$.trim($input.val());
-            return isNotValid;
+
+            if($input.attr('required') && !$.trim($input.val())){
+                return true;
+            }
+            else if ($input.attr('validate')) {
+                return !$input[0].checkValidity();
+            }
+            //var isNotValid = !$.trim($input.val());
+            return false;
         },
         getErrortypeFallback : function($input){
+
             var inputType = $input.attr("type");
             var error = {
                 type: "",
