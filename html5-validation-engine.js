@@ -76,10 +76,11 @@
                 }
             });
             
-            this.$el.on("click", "[type=checkbox],[type=radio]", function(){
+            this.$el.on("change", "[type=checkbox],[type=radio]", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
+                    $("#error_"+$el.attr("name")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
                 }
@@ -121,7 +122,7 @@
         },
         checkInput : function ($el) {
 
-            if($el.attr('required')){
+            if($el.attr('required') || $el.attr('type') === 'radio'){
 
                 return this.getErrortype($el);
             }
@@ -137,7 +138,7 @@
         getErrortype: function($input){
             var error = false;
 
-            if ($input[0].tagName === 'SELECT') {
+            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio') {
                 error = this.getErrortypeFallback($input);
             } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
                 error = true;
@@ -150,7 +151,11 @@
         },
         getError : function($input){
 
-            if($input.attr('required') && !$.trim($input.val())){
+            var value = $.trim($input.val());
+            if ($input.attr('type') === 'radio') {
+                return this.validate.radio($input).isNotValid;
+            }
+            else if($input.attr('required') && !value) {
                 return true;
             }
             else if ($input.attr('validate')) {
@@ -168,7 +173,8 @@
             };
             if(inputType === "radio"){
                 error = this.validate.radio($input);
-            } else if ($input[0].tagName === 'SELECT') {
+            }
+            else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
             }
             else if(!$input.val()){
@@ -203,6 +209,11 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 $errorContainer = $("#error_"+$input.attr("id"));
+
+            if ($input.attr('type') === 'radio' && !$errorContainer.length) {
+                // Try with name
+                $errorContainer = $("#error_"+$input.attr("name"));
+            }
             // Re-adjust message if field is empty
             var isRequired = $input.attr('required') && $input.attr('required') != '';
             if (($input.val() && $input.val().length == 0) && isRequired) {
@@ -233,7 +244,7 @@
                 var $group = $("[name='"+$input.attr("name")+"']:checked");
                 return {
                     type:"radio",
-                    isNotValid : !$group.val() ? true : false
+                    isNotValid : $group.length === 0
                 };
             },
             select: function($select) {
