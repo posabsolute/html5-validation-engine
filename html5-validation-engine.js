@@ -80,7 +80,7 @@
                 var $el = $(this);
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
-                    $("#error_"+$el.attr("name")).empty();
+                    $("[id='error_" + $el.attr("name") + "']").empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
                 }
