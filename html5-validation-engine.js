@@ -17,7 +17,7 @@
 
         this.options = $.extend( {}, defaults, options) ;
 
-        this._defaults = defaults;
+        this._defaults = this.options;
         this._name = pluginName;
 
         this.init(options);
@@ -215,8 +215,8 @@
                 $errorContainer = $("#error_"+$input.attr("name"));
             }
             // Re-adjust message if field is empty
-            var isRequired = $input.attr('required') && $input.attr('required') != '';
-            if (($input.val() && $input.val().length == 0) && isRequired) {
+            var value = $.trim($input.val());
+            if($input.attr('required') && !value) {
                 message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
                             "This field is required";
             }
