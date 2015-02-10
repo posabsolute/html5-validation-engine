@@ -9,7 +9,7 @@
 
     var pluginName = "html5ValidationEngine",
         defaults = {
-            currentLocal : "en_US"
+            currentLocal : "en"
         };
 
     function Plugin( element, options ) {

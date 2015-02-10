@@ -1,5 +1,5 @@
 (function() {
-    $.html5ValidationEngine.localisations.fr_FR = {
+    $.html5ValidationEngine.localisations.fr = {
         required: "Veuillez remplir ce champ.",
         remote: "Veuillez corriger ce champ.",
         email: "Veuillez entrer une adresse courriel valide.",
