@@ -117,7 +117,6 @@
                     isValid = false;
                 }
             });
-
             return isValid;
         },
         checkInput : function ($el) {
@@ -138,7 +137,7 @@
         getErrortype: function($input){
             var error = false;
 
-            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio') {
+            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
                 error = this.getErrortypeFallback($input);
             } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
                 error = true;
@@ -173,6 +172,9 @@
             };
             if(inputType === "radio"){
                 error = this.validate.radio($input);
+            }
+            if(inputType === "checkbox"){
+                error = this.validate.checkbox($input);
             }
             else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
@@ -245,6 +247,12 @@
                 return {
                     type:"radio",
                     isNotValid : $group.length === 0
+                };
+            },
+            checkbox: function($input) {
+                return {
+                    type: "checkbox",
+                    isNotValid : !$input.is(':checked') ? true : false
                 };
             },
             select: function($select) {
