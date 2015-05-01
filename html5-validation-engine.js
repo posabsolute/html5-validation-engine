@@ -173,7 +173,7 @@
             if(inputType === "radio"){
                 error = this.validate.radio($input);
             }
-            if(inputType === "checkbox"){
+            else if(inputType === "checkbox"){
                 error = this.validate.checkbox($input);
             }
             else if ($input[0].tagName === 'SELECT') {
