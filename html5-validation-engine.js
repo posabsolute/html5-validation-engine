@@ -117,6 +117,7 @@
                     isValid = false;
                 }
             });
+
             return isValid;
         },
         checkInput : function ($el) {
@@ -137,7 +138,7 @@
         getErrortype: function($input){
             var error = false;
 
-            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
+            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio') {
                 error = this.getErrortypeFallback($input);
             } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
                 error = true;
@@ -172,9 +173,6 @@
             };
             if(inputType === "radio"){
                 error = this.validate.radio($input);
-            }
-            else if(inputType === "checkbox"){
-                error = this.validate.checkbox($input);
             }
             else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
@@ -243,16 +241,10 @@
         },
         validate :{
             radio: function($input){
-                var $group = $("[name='"+$input.attr("name")+"']:checked");
+                var $group = $input.parents('form').find("[name='"+$input.attr("name")+"']:checked");
                 return {
                     type:"radio",
                     isNotValid : $group.length === 0
-                };
-            },
-            checkbox: function($input) {
-                return {
-                    type: "checkbox",
-                    isNotValid : !$input.is(':checked') ? true : false
                 };
             },
             select: function($select) {
