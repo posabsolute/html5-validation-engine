@@ -26,7 +26,6 @@
     Plugin.prototype = {
 
         init: function() {
-           
             this.loadValidation();
         },
         isHtml5 : function(){
@@ -73,6 +72,10 @@
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
             
@@ -83,6 +86,10 @@
                     $("[id='error_" + $el.attr("name") + "']").empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
 
@@ -92,6 +99,10 @@
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
 
@@ -101,6 +112,8 @@
                 $("#error_"+$el.attr("id")).empty();
                 $el.next(".error:first").remove();
                 $el.next(".hopOver").next(".error:first").remove();
+                $el.removeClass('validation-error');
+                $el.trigger('valid');
             });
         },
         submitEvent : function(){
@@ -140,7 +153,8 @@
 
             if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio') {
                 error = this.getErrortypeFallback($input);
-            } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+            } //else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+            else if(this.getErrortypeFallback($input) || this.getErrorCustom($input)){
                 error = true;
             }
   
@@ -161,6 +175,7 @@
             else if ($input.attr('validate')) {
                 return !$input[0].checkValidity();
             }
+            
             //var isNotValid = !$.trim($input.val());
             return false;
         },
@@ -183,7 +198,7 @@
                     isNotValid : true
                 };
                 
-            }else if(inputType === "text" || inputType === "password" || inputType === "date"){
+            } else if(inputType === "number" || inputType === "tel" || inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
             }
            
@@ -221,7 +236,7 @@
                             "This field is required";
             }
 
-            var content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>"; 
+            var content = "<div class='error'>"+message+"</div>"; 
 
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
@@ -232,6 +247,8 @@
             }else{
                 $input.next(".hopOver:first").after(content);
             }
+
+            $input.addClass('validation-error');
             
         },
         destroy : function(){
@@ -257,6 +274,7 @@
                 var required = $input.attr("required"),
                     pattern = $input.attr("pattern"),
                     matchElement = $input.attr("match"),
+                    minlength = $input.attr("minlength"),
                     maxlength = $input.attr("maxlength"),
                     min = $input.attr("min"),
                     max = $input.attr("max"),
@@ -265,20 +283,28 @@
 
                 if (required) {
                     type="required";
-                    isNotValid = $input.val().length == 0 ? true : false;
-                }else if(pattern){
+                    isNotValid = isNotValid || ($input.val().length === 0 ? true : false);
+                }
+                if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
-                    isNotValid = !regex.test($input.val()) ? true : false;
-                }else if(matchElement){
+                    isNotValid = isNotValid || (!regex.test($input.val()) ? true : false);
+                }
+                if(matchElement){
                     type="match";
-                    isNotValid = $(matchElement).val() !== $input.val() ? true : false;
-                }else if(maxlength){
+                    isNotValid = isNotValid || ($(matchElement).val() !== $input.val() ? true : false);
+                }
+                if(minlength) {
+                    type="minlength";
+                    isNotValid = isNotValid || ($input.val().length < parseFloat(minlength) ? true : false);
+                }
+                if(maxlength){
                     type="maxlength";
-                    isNotValid = $input.val().length > parseFloat(maxlength) ? true : false;
-                }else if(min && max){
+                    isNotValid = isNotValid || ($input.val().length > parseFloat(maxlength) ? true : false);
+                }
+                if(min && max){
                     type="minmax";
-                    isNotValid = ($input.val().length < min || $input.val().length> max) ? true : false;
+                    isNotValid = isNotValid || (($input.val().length < min || $input.val().length> max) ? true : false);
                 }
                 return {
                     type:type,
