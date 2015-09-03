@@ -304,7 +304,7 @@
                 }
                 if(min && max){
                     type="minmax";
-                    isNotValid = isNotValid || (($input.val().length < min || $input.val().length> max) ? true : false);
+                    isNotValid = isNotValid || ((parseFloat($input.val()) < min || parseFloat($input.val())> max) ? true : false);
                 }
                 return {
                     type:type,
