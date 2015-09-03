@@ -232,11 +232,11 @@
             // Re-adjust message if field is empty
             var value = $.trim($input.val());
             if($input.attr('required') && !value) {
-                message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
+                message = $input.data('empty-error-message') || $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
                             "This field is required";
             }
 
-            var content = "<div class='error'>"+message+"</div>"; 
+            var content = "<div class='error'>"+message+"</div>";
 
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
