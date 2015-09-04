@@ -234,6 +234,12 @@
             if($input.attr('required') && !value) {
                 message = $input.data('empty-error-message') || $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
                             "This field is required";
+            } else if ($input.attr("maxlength")) {
+                var max = parseInt($input.attr("maxlength"));
+                if (value.length > max) {
+                    message = $.html5ValidationEngine.localisations[this._defaults.currentLocal]['maxlength'](max) ||
+                            "Please enter no more than " + maxlength + " characters.";
+                }
             }
 
             var content = "<div class='error'>"+message+"</div>";
@@ -359,7 +365,7 @@
                 return function() {
                     var args = $.makeArray(arguments);
                     args.unshift(source);
-                    return $.validator.format.apply( this, args );
+                    return $.html5ValidationEngine.format.apply( this, args );
                 };
             }
             if ( arguments.length > 2 && params.constructor !== Array  ) {
