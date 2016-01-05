@@ -1,5 +1,5 @@
 (function() {
-	$.html5ValidationEngine.localisations.en = {
+	$.html5ValidationEngine.localisations.ja = {
 		required: "Please fill out this field.",
 		remote: "Please fix this field.",
 		email: "Please enter a valid email address.",
