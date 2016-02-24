@@ -305,9 +305,9 @@
                     isNotValid = false,
                     type ="";
 
-                if (characterRestrictionPattern){
+                if (characterRestrictionPattern) {
                     var regex = new RegExp(characterRestrictionPattern);
-                    isNotValid = isNotValid || (!regex.test($input.val()) ? true : false);
+                    isNotValid = !regex.test($input.val());
                     if (isNotValid) {
                         return {
                             type: "characterRestriction",
