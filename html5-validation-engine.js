@@ -16,7 +16,7 @@
         this.$el = $(element);
 
         this.options = $.extend( {}, defaults, options) ;
-
+        this._state = {};
         this._defaults = this.options;
         this._name = pluginName;
 
@@ -202,6 +202,9 @@
                 
             } else if(inputType === "number" || inputType === "tel" || inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
+                if (error.isNotValid) {
+                    this._state.currentErrorType = error.type;
+                };
             }
            
             return error.isNotValid;
@@ -243,6 +246,11 @@
                             "Please enter no more than " + maxlength + " characters.";
                 }
             }
+
+            if (this._state.currentErrorType == 'characterRestriction') {
+                message = $input.data('character-restriction-error-message');
+            }
+            
 
             var content = "<div class='error'>"+message+"</div>";
 
@@ -288,6 +296,7 @@
             text : function($input){
                 var required = $input.attr("required"),
                     pattern = $input.attr("pattern"),
+                    characterRestrictionPattern = $input.attr("data-character-restriction"),
                     matchElement = $input.attr("match"),
                     minlength = $input.attr("minlength"),
                     maxlength = $input.attr("maxlength"),
@@ -295,6 +304,17 @@
                     max = $input.attr("max"),
                     isNotValid = false,
                     type ="";
+
+                if (characterRestrictionPattern) {
+                    var regex = new RegExp(characterRestrictionPattern);
+                    isNotValid = !regex.test($input.val());
+                    if (isNotValid) {
+                        return {
+                            type: "characterRestriction",
+                            isNotValid: isNotValid
+                        };
+                    }
+                }
 
                 if (required) {
                     type="required";
