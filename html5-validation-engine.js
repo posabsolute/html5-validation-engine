@@ -26,7 +26,44 @@
     Plugin.prototype = {
 
         init: function() {
+            this.initAdditionalPatterns();
             this.loadValidation();
+        },
+        initAdditionalPatterns: function() {
+            // To make it easier to follow, split the regular expressions up and explain
+            // what each one does individually. We'll concat them together later.
+            var regexArray = [
+                /a-zA-Z0-9/, // Regular alphanumeric stuff
+                /'\.,-\/#!@$%\^&\*;:{}=\-_+`~()\|/, // Match punctuation and other special characters
+                /\\\/(){}\[\]/, // Match slashes and brackets
+                /\s\u200A\u2009\u20a0\u2008\u2002\u2007\u3000\u2003\u2004\u2005\u2006/, // Matches regular spaces along with the weirder spaces
+                /\u00C0-\u00ff/, // Matches everything latin-based between À-ÿ
+                /\uff0b/, // Matches the weird plus sign (＋)
+                /\uff08\uff09/, // Matches the weird brackets (（）)
+                /\uff0c/, // Matches the weird comma (，)
+                /\u00e6/, // Matches that a and e stuck together thing (æ)
+                /\u00ba/, // Matches that weird symbol europeans use for NO. (º)
+                /\u2010-\u2015/, // Matches the weird dashes (‐ — and everything in between)
+                /\uff03/, // Matches the weird hash tag (＃)
+                /\u202a\u202b\u202c/, // Matches foreign-language directional formatting chars (rtl, ltr, pop directional)
+            ];
+
+            var combinedSource = '';
+
+            for (var i = 0; i < regexArray.length; i++) {
+                combinedSource += regexArray[i].source;
+            }
+
+            var addressRegEx = '^[' + combinedSource + ']*$',
+                $formInputs = this.$el.find('form [required][validate]');
+
+            $formInputs.each(function() {
+                var $this = $(this);
+
+                if ($this.attr('data-latin-characters-only') == 'true') {
+                    $this.attr('data-character-restriction', addressRegEx);
+                }
+            });            
         },
         isHtml5 : function(){
             // need to optimise
