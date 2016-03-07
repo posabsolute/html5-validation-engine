@@ -54,16 +54,12 @@
                 combinedSource += regexArray[i].source;
             }
 
-            var addressRegEx = '^[' + combinedSource + ']*$',
-                $formInputs = this.$el.find('form [required][validate]');
-
-            $formInputs.each(function() {
-                var $this = $(this);
-
-                if ($this.attr('data-latin-characters-only') == 'true') {
-                    $this.attr('data-character-restriction', addressRegEx);
-                }
-            });            
+            this._defaults.latinCharacterPattern = '^[' + combinedSource + ']*$';
+        },
+        applyAdditionalPatterns: function($el) {
+            if ($el.attr('data-latin-characters-only') == 'true') {
+                $el.attr('data-character-restriction', this._defaults.latinCharacterPattern);
+            }
         },
         isHtml5 : function(){
             // need to optimise
@@ -171,7 +167,7 @@
             return isValid;
         },
         checkInput : function ($el) {
-
+            this.applyAdditionalPatterns($el);
             if($el.attr('required') || $el.attr('type') === 'radio'){
 
                 return this.getErrortype($el);
