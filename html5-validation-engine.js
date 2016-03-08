@@ -45,7 +45,11 @@
                 /\u00ba/, // Matches that weird symbol europeans use for NO. (º)
                 /\u2010-\u2015/, // Matches the weird dashes (‐ — and everything in between)
                 /\uff03/, // Matches the weird hash tag (＃)
-                /\u202a\u202b\u202c/, // Matches foreign-language directional formatting chars (rtl, ltr, pop directional)
+                // See here for bi-directional text control characters:
+                // https://en.wikipedia.org/wiki/Bi-directional_text#explicit_formatting
+                /\u202a-\u202e/, // Matches foreign-language directional formatting chars (rtl, ltr, pop)
+                /\u2066-\u2069/, // Matches isolated foreign-language direction formatting chars (lri, rli, fsi, pop)
+                /\u200e\u200f\u061c/, // Matches foreign language marks (lrm, rlm, alm for arabic)
             ];
 
             var combinedSource = '';
