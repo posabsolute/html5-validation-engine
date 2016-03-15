@@ -55,6 +55,7 @@
             var combinedSource = '';
 
             for (var i = 0; i < regexArray.length; i++) {
+                regexArray[i] = new RegExp(regexArray[i]);
                 combinedSource += regexArray[i].source;
             }
 
