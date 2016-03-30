@@ -1,20 +1,20 @@
 (function() {
 	$.html5ValidationEngine.localisations.ja = {
-		required: "Please fill out this field.",
-		remote: "Please fix this field.",
-		email: "Please enter a valid email address.",
-		url: "Please enter a valid URL.",
-		date: "Please enter a valid date.",
-		number: "Please enter a valid number.",
-		digits: "Please enter only digits.",
-		match : "Please match the password",
-		creditcard: "Please enter a valid credit card number.",
-		equalTo: "Please enter the same value again.",
-		maxlength: $.html5ValidationEngine.format("Please enter no more than {0} characters."),
-		minlength: $.html5ValidationEngine.format("Please enter at least {0} characters."),
-		minmax: $.html5ValidationEngine.format("Please enter a value between {0} and {1} characters long."),
-		range: $.html5ValidationEngine.format("Please enter a value between {0} and {1}."),
-		max: $.html5ValidationEngine.format("Please enter a value less than or equal to {0}."),
-		min: $.html5ValidationEngine.format("Please enter a value greater than or equal to {0}.")
+		required: "必ずご記入ください。",
+		remote: "こちらのフィールドを訂正してください。",
+		email: "有効なメールアドレスを入力してください。",
+		url: "有効なURLを入力してください。",
+		date: "有効な日付を入力してください。",
+		number: "有効な番号を入力してくだい。",
+		digits: "数字のみを入力してください。",
+		match : "パスワードを一致させてください。",
+		creditcard: "有効なクレジットカード番号を入力してください。",
+		equalTo: "もう一度同じ値を入力してください。",
+		maxlength: $.html5ValidationEngine.format("{0}以下の文字または記号を入力してください。"),
+		minlength: $.html5ValidationEngine.format("{0} 以上の文字または記号を入力してください。"),
+		minmax: $.html5ValidationEngine.format("{0}から{1}までの長さの文字または数字を入力してください。"),
+		range: $.html5ValidationEngine.format("{0}から{1}までの値を入力してください。"),
+		max: $.html5ValidationEngine.format("{0}以下の値を入力してください。"),
+		min: $.html5ValidationEngine.format("{0}以上の値を入力してください。")
 	};
 }());
