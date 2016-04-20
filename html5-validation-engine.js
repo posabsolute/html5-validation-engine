@@ -45,12 +45,17 @@
                 /\u00ba/, // Matches that weird symbol europeans use for NO. (º)
                 /\u2010-\u2015/, // Matches the weird dashes (‐ — and everything in between)
                 /\uff03/, // Matches the weird hash tag (＃)
-                /\u202a\u202b\u202c/, // Matches foreign-language directional formatting chars (rtl, ltr, pop directional)
+                // See here for bi-directional text control characters:
+                // https://en.wikipedia.org/wiki/Bi-directional_text#explicit_formatting
+                /\u202a-\u202e/, // Matches foreign-language directional formatting chars (rtl, ltr, pop)
+                /\u2066-\u2069/, // Matches isolated foreign-language direction formatting chars (lri, rli, fsi, pop)
+                /\u200e\u200f\u061c/, // Matches foreign language marks (lrm, rlm, alm for arabic)
             ];
 
             var combinedSource = '';
 
             for (var i = 0; i < regexArray.length; i++) {
+                regexArray[i] = new RegExp(regexArray[i]);
                 combinedSource += regexArray[i].source;
             }
 
@@ -86,7 +91,7 @@
                     $("form").attr("novalidate", true);
                     var valid = true,
                         $form = $(this).closest("form");
-                    
+
                     if($form.find('.error').length > 0 || !self.checkIfValid($form)){
                         e.stopPropagation();
                         e.stopImmediatePropagation();
@@ -97,11 +102,11 @@
                     return valid;
                 });
             }
-        
+
             this.$el.on("blur", ":input:not(.placeholder)", function(){
                 var $el = $(this);
                 if ($el.attr("data-no-error-onblur")) { return; }
-                
+
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
@@ -112,7 +117,7 @@
                     $el.trigger('invalid');
                 }
             });
-            
+
             this.$el.on("change", "[type=checkbox],[type=radio]", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
@@ -151,7 +156,7 @@
             });
         },
         submitEvent : function(){
-            
+
         },
         blurEvent: function(){
 
@@ -168,7 +173,6 @@
             return isValid;
         },
         checkInput : function ($el) {
-            this.applyAdditionalPatterns($el);
             if($el.attr('required') || $el.attr('type') === 'radio'){
 
                 return this.getErrortype($el);
@@ -179,10 +183,12 @@
                 }else{
                     return false;
                 }
-                
+
             }
         },
         getErrortype: function($input){
+            this.applyAdditionalPatterns($input);
+
             var error = false;
 
             if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
@@ -191,7 +197,7 @@
             else if(this.getErrortypeFallback($input) || this.getErrorCustom($input)){
                 error = true;
             }
-  
+
             if(error){
                 this.showError($input);
             }
@@ -209,7 +215,7 @@
             else if ($input.attr('validate')) {
                 return !$input[0].checkValidity();
             }
-            
+
             //var isNotValid = !$.trim($input.val());
             return false;
         },
@@ -233,14 +239,14 @@
                     type:"required",
                     isNotValid : true
                 };
-                
+
             } else if(inputType === "number" || inputType === "tel" || inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
                 if (error.isNotValid) {
                     this._state.currentErrorType = error.type;
                 };
             }
-           
+
             return error.isNotValid;
         },
         getErrorCustom : function($input){
@@ -284,7 +290,7 @@
             if (this._state.currentErrorType == 'characterRestriction') {
                 message = $input.data('character-restriction-error-message');
             }
-            
+
 
             var content = "<div class='error'>"+message+"</div>";
 
@@ -299,7 +305,7 @@
             }
 
             $input.addClass('validation-error');
-            
+
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
