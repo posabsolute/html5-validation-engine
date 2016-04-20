@@ -55,6 +55,7 @@
             }
 
             this._defaults.latinCharacterPattern = '^[' + combinedSource + ']*$';
+            $.html5ValidationEngine.patterns['latinCharactersOnly'] = this._defaults.latinCharacterPattern;
         },
         applyAdditionalPatterns: function($el) {
             if ($el.attr('data-latin-characters-only') == 'true') {
@@ -442,6 +443,7 @@
                 });
             });
             return source;
-        }
+        },
+        patterns: {}
     };
 })( jQuery, window, document );
