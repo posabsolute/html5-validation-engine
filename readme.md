@@ -21,7 +21,7 @@ It works the same way as you would use the html5 validator. add $(document).html
 ## License (MIT)
 
 Copyright 2013 Cedric Dugas
-http://www.position-relative.net/
+http://me.position-absolute.com
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
