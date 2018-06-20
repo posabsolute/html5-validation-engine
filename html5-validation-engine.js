@@ -9,15 +9,15 @@
 
     var pluginName = "html5ValidationEngine",
         defaults = {
-            currentLocal : "en_US"
+            currentLocal : "en"
         };
 
     function Plugin( element, options ) {
         this.$el = $(element);
 
         this.options = $.extend( {}, defaults, options) ;
-
-        this._defaults = defaults;
+        this._state = {};
+        this._defaults = this.options;
         this._name = pluginName;
 
         this.init(options);
@@ -26,8 +26,46 @@
     Plugin.prototype = {
 
         init: function() {
-           
+            this.initAdditionalPatterns();
             this.loadValidation();
+        },
+        initAdditionalPatterns: function() {
+            // To make it easier to follow, split the regular expressions up and explain
+            // what each one does individually. We'll concat them together later.
+            var regexArray = [
+                /a-zA-Z0-9/, // Regular alphanumeric stuff
+                /'\.,-\/#!@$%\^&\*;:{}=\-_+`~()\|/, // Match punctuation and other special characters
+                /\\\/(){}\[\]/, // Match slashes and brackets
+                /\s\u200A\u2009\u20a0\u2008\u2002\u2007\u3000\u2003\u2004\u2005\u2006/, // Matches regular spaces along with the weirder spaces
+                /\u00C0-\u00ff/, // Matches everything latin-based between À-ÿ
+                /\uff0b/, // Matches the weird plus sign (＋)
+                /\uff08\uff09/, // Matches the weird brackets (（）)
+                /\uff0c/, // Matches the weird comma (，)
+                /\u00e6/, // Matches that a and e stuck together thing (æ)
+                /\u00ba/, // Matches that weird symbol europeans use for NO. (º)
+                /\u2010-\u2015/, // Matches the weird dashes (‐ — and everything in between)
+                /\uff03/, // Matches the weird hash tag (＃)
+                // See here for bi-directional text control characters:
+                // https://en.wikipedia.org/wiki/Bi-directional_text#explicit_formatting
+                /\u202a-\u202e/, // Matches foreign-language directional formatting chars (rtl, ltr, pop)
+                /\u2066-\u2069/, // Matches isolated foreign-language direction formatting chars (lri, rli, fsi, pop)
+                /\u200e\u200f\u061c/, // Matches foreign language marks (lrm, rlm, alm for arabic)
+            ];
+
+            var combinedSource = '';
+
+            for (var i = 0; i < regexArray.length; i++) {
+                regexArray[i] = new RegExp(regexArray[i]);
+                combinedSource += regexArray[i].source;
+            }
+
+            this._defaults.latinCharacterPattern = '^[' + combinedSource + ']*$';
+            $.html5ValidationEngine.patterns['latinCharactersOnly'] = this._defaults.latinCharacterPattern;
+        },
+        applyAdditionalPatterns: function($el) {
+            if ($el.attr('data-latin-characters-only') == 'true') {
+                $el.attr('data-character-restriction', this._defaults.latinCharacterPattern);
+            }
         },
         isHtml5 : function(){
             // need to optimise
@@ -53,7 +91,7 @@
                     $("form").attr("novalidate", true);
                     var valid = true,
                         $form = $(this).closest("form");
-                    
+
                     if($form.find('.error').length > 0 || !self.checkIfValid($form)){
                         e.stopPropagation();
                         e.stopImmediatePropagation();
@@ -64,24 +102,33 @@
                     return valid;
                 });
             }
-        
+
             this.$el.on("blur", ":input:not(.placeholder)", function(){
                 var $el = $(this);
                 if ($el.attr("data-no-error-onblur")) { return; }
-                
+
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
-            
-            this.$el.on("click", "[type=checkbox],[type=radio]", function(){
+
+            this.$el.on("change", "[type=checkbox],[type=radio]", function(){
                 var $el = $(this);
                 if(!self.checkInput($el)){
                     $("#error_"+$el.attr("id")).empty();
+                    $("[id='error_" + $el.attr("name") + "']").empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
 
@@ -91,6 +138,10 @@
                     $("#error_"+$el.attr("id")).empty();
                     $el.next(".error:first").remove();
                     $el.next(".hopOver").next(".error:first").remove();
+                    $el.removeClass('validation-error');
+                    $el.trigger('valid');
+                } else {
+                    $el.trigger('invalid');
                 }
             });
 
@@ -100,10 +151,12 @@
                 $("#error_"+$el.attr("id")).empty();
                 $el.next(".error:first").remove();
                 $el.next(".hopOver").next(".error:first").remove();
+                $el.removeClass('validation-error');
+                $el.trigger('valid');
             });
         },
         submitEvent : function(){
-            
+
         },
         blurEvent: function(){
 
@@ -120,8 +173,7 @@
             return isValid;
         },
         checkInput : function ($el) {
-
-            if($el.attr('required')){
+            if($el.attr('required') || $el.attr('type') === 'radio'){
 
                 return this.getErrortype($el);
             }
@@ -131,28 +183,44 @@
                 }else{
                     return false;
                 }
-                
+
             }
         },
         getErrortype: function($input){
+            this.applyAdditionalPatterns($input);
+
             var error = false;
 
-            if ($input[0].tagName === 'SELECT' && this.getErrortypeFallback($input)) {
-                error = true;
-            } else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+            if ($input[0].tagName === 'SELECT' || $input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
+                error = this.getErrortypeFallback($input);
+            } //else if((this.isHtml5() ? this.getError($input) : this.getErrortypeFallback($input)) || this.getErrorCustom($input)){
+            else if(this.getErrortypeFallback($input) || this.getErrorCustom($input)){
                 error = true;
             }
-                
+
             if(error){
                 this.showError($input);
             }
             return error;
         },
         getError : function($input){
-            var isNotValid = ($input[0].validationMessage || !$.trim($input.val())) ? true : false;
-            return isNotValid;
+
+            var value = $.trim($input.val());
+            if ($input.attr('type') === 'radio') {
+                return this.validate.radio($input).isNotValid;
+            }
+            else if($input.attr('required') && !value) {
+                return true;
+            }
+            else if ($input.attr('validate')) {
+                return !$input[0].checkValidity();
+            }
+
+            //var isNotValid = !$.trim($input.val());
+            return false;
         },
         getErrortypeFallback : function($input){
+
             var inputType = $input.attr("type");
             var error = {
                 type: "",
@@ -160,7 +228,10 @@
             };
             if(inputType === "radio"){
                 error = this.validate.radio($input);
-            } else if ($input[0].tagName === 'SELECT') {
+            } else if (inputType === "checkbox") {
+                error = this.validate.checkbox($input);
+            }
+            else if ($input[0].tagName === 'SELECT') {
                 error = this.validate.select($input);
             }
             else if(!$input.val()){
@@ -168,11 +239,14 @@
                     type:"required",
                     isNotValid : true
                 };
-                
-            }else if(inputType === "text" || inputType === "password" || inputType === "date"){
+
+            } else if(inputType === "number" || inputType === "tel" || inputType === "text" || inputType === "password" || inputType === "date"){
                 error = this.validate.text($input);
+                if (error.isNotValid) {
+                    this._state.currentErrorType = error.type;
+                };
             }
-           
+
             return error.isNotValid;
         },
         getErrorCustom : function($input){
@@ -195,14 +269,30 @@
                             $input[0].validationMessage ||
                             "This field is required",
                 $errorContainer = $("#error_"+$input.attr("id"));
+
+            if ($input.attr('type') === 'radio' && !$errorContainer.length) {
+                // Try with name
+                $errorContainer = $("#error_"+$input.attr("name"));
+            }
             // Re-adjust message if field is empty
-            var isRequired = $input.attr('required') && $input.attr('required') != '';
-            if (($input.val() && $input.val().length == 0) && isRequired) {
-                message =   $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
+            var value = $.trim($input.val());
+            if($input.attr('required') && !value) {
+                message = $input.data('empty-error-message') || $.html5ValidationEngine.localisations[this._defaults.currentLocal]['required'] ||
                             "This field is required";
+            } else if ($input.attr("maxlength")) {
+                var max = parseInt($input.attr("maxlength"));
+                if (value.length > max) {
+                    message = $.html5ValidationEngine.localisations[this._defaults.currentLocal]['maxlength'](max) ||
+                            "Please enter no more than " + maxlength + " characters.";
+                }
             }
 
-            var content = "<div class='error'><i class='fa fa-ssense-warning'></i>"+message+"</div>"; 
+            if (this._state.currentErrorType == 'characterRestriction') {
+                message = $input.data('character-restriction-error-message');
+            }
+
+
+            var content = "<div class='error'>"+message+"</div>";
 
             $input.next(".error:first").remove();
             $input.next(".hopOver").next(".error:first").remove();
@@ -213,7 +303,9 @@
             }else{
                 $input.next(".hopOver:first").after(content);
             }
-            
+
+            $input.addClass('validation-error');
+
         },
         destroy : function(){
             $(document).off("invalid", this.loadHtml5Validation);
@@ -222,10 +314,17 @@
         },
         validate :{
             radio: function($input){
-                var $group = $("[name='"+$input.attr("name")+"']:checked");
+                var $group = $input.parents('form').find("[name='"+$input.attr("name")+"']:checked");
                 return {
                     type:"radio",
-                    isNotValid : !$group.val() ? true : false
+                    isNotValid : $group.length === 0
+                };
+            },
+            checkbox: function($input){
+                var $group = $input.parents('form').find("[name='"+$input.attr("name")+"']:checked");
+                return {
+                    type:"checkbox",
+                    isNotValid : $group.length === 0
                 };
             },
             select: function($select) {
@@ -237,29 +336,50 @@
             text : function($input){
                 var required = $input.attr("required"),
                     pattern = $input.attr("pattern"),
+                    characterRestrictionPattern = $input.attr("data-character-restriction"),
                     matchElement = $input.attr("match"),
+                    minlength = $input.attr("minlength"),
                     maxlength = $input.attr("maxlength"),
                     min = $input.attr("min"),
                     max = $input.attr("max"),
                     isNotValid = false,
                     type ="";
 
+                if (characterRestrictionPattern) {
+                    var regex = new RegExp(characterRestrictionPattern);
+                    isNotValid = !regex.test($input.val());
+                    if (isNotValid) {
+                        return {
+                            type: "characterRestriction",
+                            isNotValid: isNotValid
+                        };
+                    }
+                }
+
                 if (required) {
                     type="required";
-                    isNotValid = $input.val().length == 0 ? true : false;
-                }else if(pattern){
+                    isNotValid = isNotValid || ($input.val().length === 0 ? true : false);
+                }
+                if(pattern){
                     type="pattern";
                     var regex = new RegExp(pattern);
-                    isNotValid = !regex.test($input.val()) ? true : false;
-                }else if(matchElement){
+                    isNotValid = isNotValid || (!regex.test($input.val()) ? true : false);
+                }
+                if(matchElement){
                     type="match";
-                    isNotValid = $(matchElement).val() !== $input.val() ? true : false;
-                }else if(maxlength){
+                    isNotValid = isNotValid || ($(matchElement).val() !== $input.val() ? true : false);
+                }
+                if(minlength) {
+                    type="minlength";
+                    isNotValid = isNotValid || ($input.val().length < parseFloat(minlength) ? true : false);
+                }
+                if(maxlength){
                     type="maxlength";
-                    isNotValid = $input.val().length > parseFloat(maxlength) ? true : false;
-                }else if(min && max){
+                    isNotValid = isNotValid || ($input.val().length > parseFloat(maxlength) ? true : false);
+                }
+                if(min && max){
                     type="minmax";
-                    isNotValid = ($input.val().length < min || $input.val().length> max) ? true : false;
+                    isNotValid = isNotValid || ((parseFloat($input.val()) < min || parseFloat($input.val())> max) ? true : false);
                 }
                 return {
                     type:type,
@@ -314,7 +434,7 @@
                 return function() {
                     var args = $.makeArray(arguments);
                     args.unshift(source);
-                    return $.validator.format.apply( this, args );
+                    return $.html5ValidationEngine.format.apply( this, args );
                 };
             }
             if ( arguments.length > 2 && params.constructor !== Array  ) {
@@ -329,6 +449,7 @@
                 });
             });
             return source;
-        }
+        },
+        patterns: {}
     };
 })( jQuery, window, document );
